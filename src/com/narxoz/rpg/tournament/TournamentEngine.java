@@ -43,7 +43,12 @@ public class TournamentEngine {
         //   new HpHandler()
         // Chain them: dodge.setNext(block).setNext(armor).setNext(hp)
 
+        DefenseHandler chain = new DodgeHandler(hero.getDodgeChance(), 55L)
+                        .setNext(new BlockHandler(hero.getBlockRating()/100d))
+                        .setNext(new ArmorHandler(hero.getArmorValue()))
+                        .setNext(new HpHandler());
         // TODO: Create an ActionQueue (the invoker).
+        ActionQueue invoker = new ActionQueue();
 
         // TODO: Simulate rounds until hero or opponent is defeated (or maxRounds is reached).
         // Each round should:
@@ -58,10 +63,37 @@ public class TournamentEngine {
         //      Do NOT call hero.takeDamage() directly here.
         //   6) Log round results (e.g. "[Round N] Opponent HP: X | Hero HP: Y").
         //   7) Add the log line to result.addLine(...).
+        for (int i = 0; i < maxRounds && hero.isAlive(); i++) {
+            round = i;
 
+            invoker.enqueue(new AttackCommand(opponent, hero.getAttackPower()));
+            invoker.enqueue(new HealCommand(hero, 9));
+            invoker.enqueue(new DefendCommand(hero, 0.12d));
+
+            System.out.println("Queued actins: ");
+            for(String cmd : invoker.getCommandDescriptions())
+                System.out.println("\t" + cmd);
+            invoker.executeAll();
+
+            if(!opponent.isAlive()) {
+                result.addLine(String.format("[Round %d] %s's attack was very effective, so %s did not have able to handle it",
+                        round,
+                        hero.getName(),
+                        opponent.getName()));
+                break;
+            }
+
+            chain.handle(opponent.getAttackPower(), hero);
+
+            result.addLine(String.format("[Round %d] %s HP: %d | %s HP: %d",
+                    round,
+                    opponent.getName(), opponent.getHealth(),
+                    hero.getName(), hero.getHealth()
+            ));
+        }
         // TODO: After the loop, determine the winner.
         //   result.setWinner(hero.isAlive() ? hero.getName() : opponent.getName());
-        result.setWinner("TODO");
+        result.setWinner(hero.isAlive() ? hero.getName() : opponent.getName());
         result.setRounds(round);
         return result;
     }
