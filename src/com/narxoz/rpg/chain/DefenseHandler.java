@@ -21,8 +21,10 @@ public abstract class DefenseHandler {
         // TODO: If damage is still greater than 0 and a next handler exists, forward it.
         // TODO: What should happen when there is no next handler but damage is nonzero?
         if (next != null) {
+            if(damage == 0) return;
             next.handle(damage, target);
-        }
+        } else if (damage > 0) throw new IllegalStateException("At the end of handler chain must be the HpHandler");
+
     }
 
     public abstract void handle(int incomingDamage, ArenaFighter target);
