@@ -64,7 +64,7 @@ public class TournamentEngine {
         //   6) Log round results (e.g. "[Round N] Opponent HP: X | Hero HP: Y").
         //   7) Add the log line to result.addLine(...).
         for (int i = 0; i < maxRounds && hero.isAlive(); i++) {
-            round = i;
+            round = i+1;
 
             invoker.enqueue(new AttackCommand(opponent, hero.getAttackPower()));
             invoker.enqueue(new HealCommand(hero, 9));
